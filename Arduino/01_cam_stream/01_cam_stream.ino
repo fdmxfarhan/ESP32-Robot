@@ -7,7 +7,7 @@ const char* ssid = "Farhan-STC";
 const char* password = "ZXasQW@12";
 
 // Your Ubuntu server
-const char* serverUrl = "http://http://45.90.72.56:3008/upload";
+const char* serverUrl = "http://192.168.8.106:3008/upload";
 
 // AI Thinker Pins
 #define PWDN_GPIO_NUM     32
