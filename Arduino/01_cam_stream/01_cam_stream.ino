@@ -53,11 +53,6 @@ void setupMotors() {
   pinMode(RIGHT_IN1, OUTPUT);
   pinMode(RIGHT_IN2, OUTPUT);
 
-  ledcSetup(0, 1000, 8);
-  ledcSetup(1, 1000, 8);
-
-  ledcAttachPin(LEFT_PWM, 0);
-  ledcAttachPin(RIGHT_PWM, 1);
 }
 
 // =====================
@@ -73,7 +68,6 @@ void driveMotor(int in1, int in2, int channel, int speed) {
     digitalWrite(in2, LOW);
   }
 
-  ledcWrite(channel, abs(speed));
 }
 
 // =====================
@@ -102,6 +96,11 @@ void getJoystick(int &x, int &y) {
     deserializeJson(doc, payload);
     x = doc["x"] | 0;
     y = doc["y"] | 0;
+    Serial.print("X: ");
+    Serial.print(x);
+    Serial.print("\tY: ");
+    Serial.println(y);
+
   }
   http.end();
 }
@@ -132,8 +131,8 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QVGA;
-  config.jpeg_quality = 12;
+  config.frame_size = FRAMESIZE_QQVGA;
+  config.jpeg_quality = 15;
   config.fb_count = 1;
 
   esp_camera_init(&config);
@@ -162,5 +161,5 @@ void loop() {
   getJoystick(x, y);
   controlMotors(x, y);
 
-  delay(80); // sync with FPS
+  delay(120); // sync with FPS
 }
