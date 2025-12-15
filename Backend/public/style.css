@@ -31,3 +31,11 @@ body {
   top: 50%;
   transform: translate(-50%, -50%);
 }
+#ledBtn {
+  font-size: 18px;
+  padding: 12px 24px;
+  margin-top: 15px;
+  background: #0f0;
+  border: none;
+  border-radius: 8px;
+}

@@ -76,7 +76,7 @@ app.post("/upload", (req, res) => {
 //   res.json({ command: lastCommand });
 // });
 let joystick = { x: 0, y: 0 };
-
+let ledState = false; // false = OFF, true = ON
 app.post("/control", (req, res) => {
   joystick = req.body;
   res.json({ status: "ok" });
@@ -85,7 +85,14 @@ app.post("/control", (req, res) => {
 app.get("/command", (req, res) => {
   res.json(joystick);
 });
-
+app.post("/led", (req, res) => {
+  ledState = !ledState;
+  console.log("LED:", ledState ? "ON" : "OFF");
+  res.json({ led: ledState });
+});
+app.get("/led", (req, res) => {
+  res.json({ led: ledState });
+});
 // --------------------
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on 0.0.0.0:${PORT}`);

@@ -121,7 +121,20 @@
         window.addEventListener("blur", resetJoystick);
     </script>
 
+    <h2>Flash LED</h2>
 
+    <button id="ledBtn" onclick="toggleLED()">LED OFF</button>
+
+    <script>
+        function toggleLED() {
+            fetch("/led", { method: "POST" })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("ledBtn").innerText =
+                        data.led ? "LED ON" : "LED OFF";
+                });
+        }
+    </script>
 </body>
 
 </html>
