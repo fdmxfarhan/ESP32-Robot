@@ -46,6 +46,7 @@ const char* commandUrl = "http://45.90.72.56:3008/command";
 #define HREF_GPIO_NUM 23
 #define PCLK_GPIO_NUM 22
 #define FLASH_LED_PIN 4
+bool ledOn = false;
 
 // =====================
 void setupMotors() {
@@ -54,7 +55,19 @@ void setupMotors() {
   pinMode(RIGHT_IN1, OUTPUT);
   pinMode(RIGHT_IN2, OUTPUT);
 }
+void getLEDState() {
+  HTTPClient http;
+  http.begin("http://45.90.72.56:3008/led");
 
+  if (http.GET() == 200) {
+    String payload = http.getString();
+    StaticJsonDocument<32> doc;
+    deserializeJson(doc, payload);
+    ledOn = doc["led"] | false;
+    digitalWrite(FLASH_LED_PIN, ledOn ? HIGH : LOW);
+  }
+  http.end();
+}
 // =====================
 void driveMotor(int in1, int in2, int channel, int speed) {
   if (speed > 0) {
@@ -108,7 +121,7 @@ void setup() {
   Serial.begin(115200);
   setupMotors();
   pinMode(FLASH_LED_PIN, OUTPUT);
-  digitalWrite(FLASH_LED_PIN, HIGH);  // OFF by default
+  digitalWrite(FLASH_LED_PIN, LOW);  // OFF by default
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -159,6 +172,6 @@ void loop() {
   int x = 0, y = 0;
   getJoystick(x, y);
   controlMotors(x, y);
-
+  getLEDState();
   delay(80);  // sync with FPS
 }
