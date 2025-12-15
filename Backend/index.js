@@ -1,10 +1,29 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const app = express();
 
 const PORT = 3008;
 
 let clients = [];
+let lastCommand = "STOP";
 
+// --------------------
+// Middleware
+// --------------------
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+app.use(bodyParser.json());
+
+// --------------------
+// Dashboard Page
+// --------------------
+app.get("/", (req, res) => {
+  res.render("index");
+});
+
+// --------------------
+// MJPEG Stream
+// --------------------
 app.get("/stream", (req, res) => {
   res.writeHead(200, {
     "Content-Type": "multipart/x-mixed-replace; boundary=frame",
@@ -19,7 +38,9 @@ app.get("/stream", (req, res) => {
   });
 });
 
-// ESP32 pushes JPEG frames here
+// --------------------
+// ESP32 uploads frames
+// --------------------
 app.post("/upload", (req, res) => {
   let buffer = [];
 
@@ -39,6 +60,23 @@ app.post("/upload", (req, res) => {
   });
 });
 
+// --------------------
+// Browser sends command
+// --------------------
+app.post("/control", (req, res) => {
+  lastCommand = req.body.command;
+  console.log("Command:", lastCommand);
+  res.json({ status: "ok" });
+});
+
+// --------------------
+// ESP32 fetches command
+// --------------------
+app.get("/command", (req, res) => {
+  res.json({ command: lastCommand });
+});
+
+// --------------------
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on 0.0.0.0:${PORT}`);
 });

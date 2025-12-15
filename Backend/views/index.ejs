@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ESP32 Robot Control</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <h2>Live Camera</h2>
+    <img src="/stream" class="camera">
+
+    <h2>Control</h2>
+
+    <div class="controls">
+        <button onclick="sendCmd('F')">⬆️ Forward</button>
+        <div>
+            <button onclick="sendCmd('L')">⬅️ Left</button>
+            <button onclick="sendCmd('S')">⏹ Stop</button>
+            <button onclick="sendCmd('R')">➡️ Right</button>
+        </div>
+        <button onclick="sendCmd('B')">⬇️ Backward</button>
+    </div>
+
+    <script>
+        function sendCmd(cmd) {
+            fetch("/control", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ command: cmd })
+            });
+        }
+    </script>
+
+</body>
+
+</html>
