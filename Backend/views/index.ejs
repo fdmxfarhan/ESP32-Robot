@@ -63,10 +63,11 @@
 
         function resetJoystick() {
             active = false;
-            stick.style.transform = `translate(0,0)`;
+            stick.style.transform = `translate(-50%, -50%)`;
             status.innerText = "x: 0 | y: 0";
             send(0, 0);
         }
+
 
         // ---------- TOUCH START ----------
         joystick.addEventListener("touchstart", e => {
@@ -85,21 +86,27 @@
             let dx = t.clientX - centerX;
             let dy = t.clientY - centerY;
 
-            const max = 50;
+            const max = 75;
             const dist = Math.min(Math.sqrt(dx * dx + dy * dy), max);
             const ang = Math.atan2(dy, dx);
 
             dx = Math.cos(ang) * dist;
             dy = Math.sin(ang) * dist;
 
-            stick.style.transform = `translate(${dx}px, ${dy}px)`;
+            stick.style.transform = `translate(${dx - 55}px, ${dy - 55}px)`;
 
-            const x = Math.round((dx / max) * 100);
-            const y = Math.round((-dy / max) * 100);
+            const x = Math.round((dx / max) * 127);
+            const y = Math.round((-dy / max) * 127);
 
             status.innerText = `x: ${x} | y: ${y}`;
-            send(x, y);
+
+            const now = Date.now();
+            if (now - lastSend > 40) {
+                send(x, y);
+                lastSend = now;
+            }
         });
+
 
         // ---------- ALL STOP EVENTS ----------
         ["touchend", "touchcancel"].forEach(evt => {

@@ -6,27 +6,28 @@ body {
 }
 
 .camera {
-  width: 320px;
+  width: 100%;
   border: 3px solid #0f0;
   margin-bottom: 15px;
 }
 
 #joystick {
-  width: 150px;
-  height: 150px;
-  background: #333;
+  width: 260px;      /* ⬅ bigger */
+  height: 260px;
+  background: #222;
   border-radius: 50%;
-  margin: 20px auto;
   position: relative;
   touch-action: none;
+  margin: 20px auto;
 }
 
 #stick {
-  width: 60px;
-  height: 60px;
-  background: #0f0;
+  width: 110px;      /* ⬅ bigger thumb */
+  height: 110px;
+  background: #555;
   border-radius: 50%;
   position: absolute;
-  top: 45px;
-  left: 45px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }

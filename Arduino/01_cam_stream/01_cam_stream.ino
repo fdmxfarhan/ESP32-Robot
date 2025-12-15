@@ -131,8 +131,8 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QQVGA;
-  config.jpeg_quality = 15;
+  config.frame_size = FRAMESIZE_QVGA;
+  config.jpeg_quality = 12;
   config.fb_count = 1;
 
   esp_camera_init(&config);
@@ -161,5 +161,5 @@ void loop() {
   getJoystick(x, y);
   controlMotors(x, y);
 
-  delay(120); // sync with FPS
+  delay(80); // sync with FPS
 }
