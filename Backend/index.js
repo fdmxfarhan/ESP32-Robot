@@ -63,17 +63,27 @@ app.post("/upload", (req, res) => {
 // --------------------
 // Browser sends command
 // --------------------
-app.post("/control", (req, res) => {
-  lastCommand = req.body.command;
-  console.log("Command:", lastCommand);
-  res.json({ status: "ok" });
-});
+// app.post("/control", (req, res) => {
+//   lastCommand = req.body.command;
+//   console.log("Command:", lastCommand);
+//   res.json({ status: "ok" });
+// });
 
 // --------------------
 // ESP32 fetches command
 // --------------------
+// app.get("/command", (req, res) => {
+//   res.json({ command: lastCommand });
+// });
+let joystick = { x: 0, y: 0 };
+
+app.post("/control", (req, res) => {
+  joystick = req.body;
+  res.json({ status: "ok" });
+});
+
 app.get("/command", (req, res) => {
-  res.json({ command: lastCommand });
+  res.json(joystick);
 });
 
 // --------------------

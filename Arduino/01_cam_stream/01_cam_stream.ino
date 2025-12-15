@@ -1,15 +1,34 @@
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
 
+// =====================
 // WiFi
+// =====================
 const char* ssid = "Farhan-STC";
 const char* password = "ZXasQW@12";
 
-// Your Ubuntu server
-const char* serverUrl = "http://45.90.72.56:3008/upload";
+// =====================
+// Server URLs
+// =====================
+const char* uploadUrl  = "http://45.90.72.56:3008/upload";
+const char* commandUrl = "http://45.90.72.56:3008/command";
 
-// AI Thinker Pins
+// =====================
+// Motor Pins
+// =====================
+#define LEFT_IN1   12
+#define LEFT_IN2   13
+#define LEFT_PWM   14
+
+#define RIGHT_IN1  15
+#define RIGHT_IN2  2
+#define RIGHT_PWM  4
+
+// =====================
+// AI Thinker Camera Pins
+// =====================
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
 #define XCLK_GPIO_NUM      0
@@ -27,8 +46,70 @@ const char* serverUrl = "http://45.90.72.56:3008/upload";
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
+// =====================
+void setupMotors() {
+  pinMode(LEFT_IN1, OUTPUT);
+  pinMode(LEFT_IN2, OUTPUT);
+  pinMode(RIGHT_IN1, OUTPUT);
+  pinMode(RIGHT_IN2, OUTPUT);
+
+  ledcSetup(0, 1000, 8);
+  ledcSetup(1, 1000, 8);
+
+  ledcAttachPin(LEFT_PWM, 0);
+  ledcAttachPin(RIGHT_PWM, 1);
+}
+
+// =====================
+void driveMotor(int in1, int in2, int channel, int speed) {
+  if (speed > 0) {
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+  } else if (speed < 0) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+  } else {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+  }
+
+  ledcWrite(channel, abs(speed));
+}
+
+// =====================
+void controlMotors(int x, int y) {
+  int left  = y + x;
+  int right = y - x;
+
+  left  = constrain(left,  -100, 100);
+  right = constrain(right, -100, 100);
+
+  int pwmL = map(abs(left),  0, 100, 0, 255);
+  int pwmR = map(abs(right), 0, 100, 0, 255);
+
+  driveMotor(LEFT_IN1, LEFT_IN2, 0, left  >= 0 ? pwmL : -pwmL);
+  driveMotor(RIGHT_IN1, RIGHT_IN2, 1, right >= 0 ? pwmR : -pwmR);
+}
+
+// =====================
+void getJoystick(int &x, int &y) {
+  HTTPClient http;
+  http.begin(commandUrl);
+
+  if (http.GET() == 200) {
+    String payload = http.getString();
+    StaticJsonDocument<64> doc;
+    deserializeJson(doc, payload);
+    x = doc["x"] | 0;
+    y = doc["y"] | 0;
+  }
+  http.end();
+}
+
+// =====================
 void setup() {
   Serial.begin(115200);
+  setupMotors();
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -63,18 +144,23 @@ void setup() {
   }
 }
 
+// =====================
 void loop() {
+  // ---- CAMERA UPLOAD ----
   camera_fb_t *fb = esp_camera_fb_get();
-  if (!fb) return;
+  if (fb) {
+    HTTPClient http;
+    http.begin(uploadUrl);
+    http.addHeader("Content-Type", "image/jpeg");
+    http.POST(fb->buf, fb->len);
+    http.end();
+    esp_camera_fb_return(fb);
+  }
 
-  HTTPClient http;
-  http.begin(serverUrl);
-  http.addHeader("Content-Type", "image/jpeg");
+  // ---- JOYSTICK CONTROL ----
+  int x = 0, y = 0;
+  getJoystick(x, y);
+  controlMotors(x, y);
 
-  http.POST(fb->buf, fb->len);
-  http.end();
-
-  esp_camera_fb_return(fb);
-
-  delay(80); // ~12 FPS
+  delay(80); // sync with FPS
 }

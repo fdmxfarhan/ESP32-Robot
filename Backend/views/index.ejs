@@ -11,7 +11,7 @@
     <h2>Live Camera</h2>
     <img src="/stream" class="camera">
 
-    <h2>Control</h2>
+    <!-- <h2>Control</h2>
 
     <div class="controls">
         <button onclick="sendCmd('F')">⬆️ Forward</button>
@@ -29,6 +29,71 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ command: cmd })
+            });
+        }
+    </script> -->
+
+
+    <h2>Joystick Control</h2>
+
+    <div id="joystick">
+        <div id="stick"></div>
+    </div>
+
+    <p id="status">x: 0 | y: 0</p>
+
+    <script>
+        const joystick = document.getElementById("joystick");
+        const stick = document.getElementById("stick");
+        const status = document.getElementById("status");
+
+        let dragging = false;
+        let centerX, centerY;
+
+        joystick.addEventListener("touchstart", e => {
+            dragging = true;
+            const rect = joystick.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+        });
+
+        joystick.addEventListener("touchmove", e => {
+            if (!dragging) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            let dx = touch.clientX - centerX;
+            let dy = touch.clientY - centerY;
+
+            const max = 50;
+            const dist = Math.min(Math.sqrt(dx * dx + dy * dy), max);
+            const angle = Math.atan2(dy, dx);
+
+            dx = Math.cos(angle) * dist;
+            dy = Math.sin(angle) * dist;
+
+            stick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+            const x = Math.round((dx / max) * 100);
+            const y = Math.round((-dy / max) * 100);
+
+            status.innerText = `x: ${x} | y: ${y}`;
+
+            sendJoystick(x, y);
+        });
+
+        joystick.addEventListener("touchend", () => {
+            dragging = false;
+            stick.style.transform = `translate(0, 0)`;
+            status.innerText = "x: 0 | y: 0";
+            sendJoystick(0, 0);
+        });
+
+        function sendJoystick(x, y) {
+            fetch("/control", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ x, y })
             });
         }
     </script>
