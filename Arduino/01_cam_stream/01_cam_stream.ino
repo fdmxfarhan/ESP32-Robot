@@ -20,11 +20,9 @@ const char* commandUrl = "http://45.90.72.56:3008/command";
 // =====================
 #define LEFT_IN1 12
 #define LEFT_IN2 13
-#define LEFT_PWM 14
 
 #define RIGHT_IN1 15
-#define RIGHT_IN2 2
-#define RIGHT_PWM 4
+#define RIGHT_IN2 14
 
 // =====================
 // AI Thinker Camera Pins
@@ -70,10 +68,10 @@ void getLEDState() {
 }
 // =====================
 void driveMotor(int in1, int in2, int channel, int speed) {
-  if (speed > 0) {
+  if (speed > 50) {
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
-  } else if (speed < 0) {
+  } else if (speed < -50) {
     digitalWrite(in1, LOW);
     digitalWrite(in2, HIGH);
   } else {
@@ -84,8 +82,8 @@ void driveMotor(int in1, int in2, int channel, int speed) {
 
 // =====================
 void controlMotors(int x, int y) {
-  int left = y + x;
-  int right = y - x;
+  int left = y - x;
+  int right = y + x;
 
   left = constrain(left, -100, 100);
   right = constrain(right, -100, 100);
