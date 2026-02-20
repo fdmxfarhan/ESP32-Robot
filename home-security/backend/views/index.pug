@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  .grid
+    each cam, index in cameras
+      .card
+        h2= cam.name
+        img(id=`cam-${index}`, src=cam.stream, alt=cam.name)
+
+        .controls
+          button.on-btn(
+            onclick=`flashOn('${cam.base}', 'cam-${index}')`
+          ) Flash ON
+
+          button.off-btn(
+            onclick=`flashOff('${cam.base}', 'cam-${index}')`
+          ) Flash OFF

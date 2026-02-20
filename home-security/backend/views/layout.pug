@@ -1,0 +1,48 @@
+doctype html
+html
+  head
+    title Home Security System
+    link(rel="stylesheet", href="/styles.css")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+  body
+    header
+      h1 🛡 Home Security Dashboard
+    block content
+    script.
+        async function pauseStream(img) {
+            const oldSrc = img.src;
+            img.src = "";
+            await new Promise(r => setTimeout(r, 400));
+            return oldSrc;
+        }
+
+        async function resumeStream(img, oldSrc) {
+            await new Promise(r => setTimeout(r, 200));
+            img.src = oldSrc + "?t=" + new Date().getTime();
+        }
+
+        async function flashOn(baseUrl, imgId) {
+            const img = document.getElementById(imgId);
+            const oldSrc = await pauseStream(img);
+
+            try {
+            await fetch(baseUrl + "/flash/on");
+            } catch (err) {
+            alert("Flash ON failed");
+            }
+
+            await resumeStream(img, oldSrc);
+        }
+
+        async function flashOff(baseUrl, imgId) {
+            const img = document.getElementById(imgId);
+            const oldSrc = await pauseStream(img);
+
+            try {
+            await fetch(baseUrl + "/flash/off");
+            } catch (err) {
+            alert("Flash OFF failed");
+            }
+
+            await resumeStream(img, oldSrc);
+        }
